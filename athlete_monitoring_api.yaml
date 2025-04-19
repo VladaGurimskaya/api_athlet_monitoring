@@ -6,7 +6,7 @@ info:
     Система для регистрации, авторизации и управления ролями пользователей.
 
 servers:
-  - url: https://api.sport-monitoring.ru/v1
+  - url: http://localhost:8000/api/v1
 
 paths:
 
@@ -29,6 +29,12 @@ paths:
                 message: Registered successfully
         '400':
           description: Невалидные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid athlete data
 
   /auth/register/invite:
     post:
@@ -49,6 +55,12 @@ paths:
                 message: Account created successfully
         '400':
           description: Ошибка инвайт-кода
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid invite code
 
   /auth/login:
     post:
@@ -62,7 +74,7 @@ paths:
               $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
-          description: Успешное вход
+          description: Успешный вход
           content:
             application/json:
               example:
@@ -70,6 +82,13 @@ paths:
                 refresh_token: "dXRva2Vu..."
         '401':
           description: Неверные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid email or password
+
   /auth/change-password:
     post:
       tags: [Auth]
@@ -100,6 +119,12 @@ paths:
                 message: Password changed
         '400':
           description: Неверный текущий пароль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Incorrect current password
 
   /biometrics:
     post:
@@ -122,6 +147,13 @@ paths:
                 message: Biometric data saved
         '400':
           description: Неверные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid biometric format
+
   /teams/join:
     post:
       tags: [Teams]
@@ -149,6 +181,12 @@ paths:
                 message: Join request sent
         '400':
           description: Ошибка отправки заявки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid team ID
 
   /teams/join/{request_id}/approve:
     post:
@@ -171,6 +209,12 @@ paths:
                 message: Request approved
         '404':
           description: Заявка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Request not found
 
   /teams/join/{request_id}/reject:
     post:
@@ -192,6 +236,14 @@ paths:
               example:
                 message: Request rejected
         '404':
+          description: Заявка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Request not found
+
   /training-plans:
     post:
       tags: [Training]
@@ -344,6 +396,13 @@ paths:
 
 components:
   schemas:
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+
     AthleteRegisterRequest:
       type: object
       required:
@@ -458,11 +517,12 @@ components:
         pulse: 52
         HRV: 85
         weight: 68.5
+
   securitySchemes:
     bearerAuth:
-          type: http
-          scheme: bearer
-          bearerFormat: JWT
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
 security:
   - bearerAuth: []

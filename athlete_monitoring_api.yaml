@@ -1,0 +1,468 @@
+openapi: 3.0.3
+info:
+  title: Спортивная система | API
+  version: 1.0.0
+  description: |
+    Система для регистрации, авторизации и управления ролями пользователей.
+
+servers:
+  - url: https://api.sport-monitoring.ru/v1
+
+paths:
+
+  /auth/register/athlete:
+    post:
+      tags: [Auth]
+      summary: Регистрация спортсмена
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AthleteRegisterRequest'
+      responses:
+        '201':
+          description: Спортсмен успешно зарегистрирован
+          content:
+            application/json:
+              example:
+                message: Registered successfully
+        '400':
+          description: Невалидные данные
+
+  /auth/register/invite:
+    post:
+      tags: [Auth]
+      summary: Регистрация по инвайт-коду (для тренеров и врачей)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteRegisterRequest'
+      responses:
+        '201':
+          description: Успех
+          content:
+            application/json:
+              example:
+                message: Account created successfully
+        '400':
+          description: Ошибка инвайт-кода
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Авторизация
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешное вход
+          content:
+            application/json:
+              example:
+                access_token: "eyJhbGci..."
+                refresh_token: "dXRva2Vu..."
+        '401':
+          description: Неверные данные
+  /auth/change-password:
+    post:
+      tags: [Auth]
+      summary: Смена пароля пользователя
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [old_password, new_password]
+              properties:
+                old_password:
+                  type: string
+                new_password:
+                  type: string
+            example:
+              old_password: oldPass123
+              new_password: newSecurePass456
+      responses:
+        '200':
+          description: Пароль успешно изменён
+          content:
+            application/json:
+              example:
+                message: Password changed
+        '400':
+          description: Неверный текущий пароль
+
+  /biometrics:
+    post:
+      tags: [Biometrics]
+      summary: Ввод биометрических данных спортсменом
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BiometricInput'
+      responses:
+        '201':
+          description: Данные успешно сохранены
+          content:
+            application/json:
+              example:
+                message: Biometric data saved
+        '400':
+          description: Неверные данные
+  /teams/join:
+    post:
+      tags: [Teams]
+      summary: Запрос спортсмена на вступление в команду
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [team_id]
+              properties:
+                team_id:
+                  type: integer
+            example:
+              team_id: 42
+      responses:
+        '201':
+          description: Заявка отправлена
+          content:
+            application/json:
+              example:
+                message: Join request sent
+        '400':
+          description: Ошибка отправки заявки
+
+  /teams/join/{request_id}/approve:
+    post:
+      tags: [Teams]
+      summary: Одобрение заявки на вступление в команду
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Заявка одобрена
+          content:
+            application/json:
+              example:
+                message: Request approved
+        '404':
+          description: Заявка не найдена
+
+  /teams/join/{request_id}/reject:
+    post:
+      tags: [Teams]
+      summary: Отклонение заявки на вступление в команду
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Заявка отклонена
+          content:
+            application/json:
+              example:
+                message: Request rejected
+        '404':
+  /training-plans:
+    post:
+      tags: [Training]
+      summary: Создание тренировочного плана
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, description]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+            example:
+              name: Подготовка к сбору
+              description: Базовый цикл подготовки
+      responses:
+        '201':
+          description: План создан
+
+  /training-plans/{plan_id}/items:
+    post:
+      tags: [Training]
+      summary: Добавление пункта в план
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plan_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_date, session_type_id, format_type_id, value]
+              properties:
+                session_date:
+                  type: string
+                  format: date
+                session_type_id:
+                  type: integer
+                format_type_id:
+                  type: integer
+                value:
+                  type: string
+                notes:
+                  type: string
+            example:
+              session_date: "2025-04-18"
+              session_type_id: 2
+              format_type_id: 1
+              value: "01:30"
+              notes: "Лёгкий кросс по парку"
+      responses:
+        '201':
+          description: Пункт добавлен
+
+  /training-plans/{plan_id}/assign:
+    post:
+      tags: [Training]
+      summary: Назначить план спортсменам
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plan_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [athlete_ids, start_date]
+              properties:
+                athlete_ids:
+                  type: array
+                  items:
+                    type: integer
+                start_date:
+                  type: string
+                  format: date
+            example:
+              athlete_ids: [101, 102, 103]
+              start_date: "2025-04-22"
+      responses:
+        '201':
+          description: План назначен спортсменам
+
+  /training-plans/items/{item_id}/override:
+    post:
+      tags: [Training]
+      summary: Изменение пункта плана для конкретного спортсмена
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [athlete_id, custom_value]
+              properties:
+                athlete_id:
+                  type: integer
+                custom_value:
+                  type: string
+                custom_notes:
+                  type: string
+            example:
+              athlete_id: 101
+              custom_value: "2:00"
+              custom_notes: "Увеличена длительность по состоянию"
+      responses:
+        '201':
+          description: Индивидуальное изменение добавлено
+
+  /training-plans/items/{item_id}:
+    delete:
+      tags: [Training]
+      summary: Удаление пункта плана
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Пункт удалён
+
+components:
+  schemas:
+    AthleteRegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - first_name
+        - last_name
+        - middle_name
+        - gender
+        - date_of_birth
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        first_name:
+          type: string
+        last_name:
+          type: string
+        middle_name:
+          type: string
+        gender:
+          type: string
+          enum: [M, F]
+        date_of_birth:
+          type: string
+          format: date
+        phone:
+          type: string
+      example:
+        email: ivanov@mail.ru
+        password: strongpass123
+        first_name: Ivan
+        last_name: Ivanov
+        middle_name: Petrovich
+        gender: M
+        date_of_birth: "2006-05-01"
+        phone: "+79000000000"
+
+    InviteRegisterRequest:
+      type: object
+      required:
+        - invite_code
+        - email
+        - password
+        - first_name
+        - last_name
+        - middle_name
+      properties:
+        invite_code:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        middle_name:
+          type: string
+      example:
+        invite_code: "TRN-INV-2025"
+        email: coach@example.com
+        password: MyStrongP@ssword
+        first_name: Anna
+        last_name: Petrova
+        middle_name: Sergeevna
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      example:
+        email: athlete@example.com
+        password: superSecret123
+
+    BiometricInput:
+      type: object
+      required:
+        - date
+        - time_of_day
+      properties:
+        date:
+          type: string
+          format: date
+        time_of_day:
+          type: string
+          enum: [morning, evening]
+        time:
+          type: string
+          format: time
+        pulse:
+          type: integer
+        HRV:
+          type: integer
+        weight:
+          type: number
+          format: float
+      example:
+        date: "2025-04-17"
+        time_of_day: "morning"
+        time: "07:30"
+        pulse: 52
+        HRV: 85
+        weight: 68.5
+  securitySchemes:
+    bearerAuth:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+
+security:
+  - bearerAuth: []

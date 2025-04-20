@@ -77,9 +77,8 @@ paths:
           description: Успешный вход
           content:
             application/json:
-              example:
-                access_token: "eyJhbGci..."
-                refresh_token: "dXRva2Vu..."
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
         '401':
           description: Неверные данные
           content:
@@ -88,6 +87,68 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error: Invalid email or password
+
+  /auth/create-invite-code:
+    post:
+      tags: [Auth]
+      summary: Создание инвайта для врача или тренера
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteCreateRequest'
+      responses:
+        '201':
+          description: Инвайт успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteCreateResponse'
+        '400':
+          description: Ошибка в данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/get-invite-details:
+    post:
+      tags: [Auth]
+      summary: Информация о приглашении
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteDetailsRequest'
+      responses:
+        '200':
+          description: Информация о приглашении
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteDetailsResponse'
+        '400':
+          description: Ошибка в данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /auth/change-password:
     post:
@@ -450,21 +511,38 @@ components:
         - invite_code
         - email
         - password
+        - role
         - first_name
         - last_name
         - middle_name
+        - license_number
       properties:
         invite_code:
           type: string
         email:
           type: string
+        phone:
+          type: string
         password:
           type: string
+        role:
+          type: string
+          enum: [ coach, medical ]
         first_name:
           type: string
         last_name:
           type: string
         middle_name:
+          type: string
+        license_number:
+          type: string
+        organization_id:
+          type: integer
+        sport_type_id:
+          type: integer
+        specialization:
+          type: string
+        experience_level:
           type: string
       example:
         invite_code: "TRN-INV-2025"
@@ -473,6 +551,63 @@ components:
         first_name: Anna
         last_name: Petrova
         middle_name: Sergeevna
+
+    InviteCreateRequest:
+      type: object
+      required:
+        - email
+        - role
+        - full_name
+        - license_number
+        - organization_id
+      properties:
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [ coach, medical ]
+        full_name:
+          type: string
+        license_number:
+          type: string
+        organization_id:
+          type: integer
+      example:
+        email: newcoach@example.com
+        role: coach
+        full_name: Петров Петр Петрович
+        license_number: 1234567890
+        organization_id: 1
+
+    InviteCreateResponse:
+      type: object
+      properties:
+        invite_code:
+          type: string
+        url:
+          type: string
+
+    InviteDetailsRequest:
+      type: object
+      properties:
+        invite_code:
+          type: string
+
+    InviteDetailsResponse:
+      type: object
+      properties:
+        invite_code:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [ coach, medical ]
+        license_number:
+          type: string
+        organization_id:
+          type: integer
 
     LoginRequest:
       type: object
@@ -517,6 +652,12 @@ components:
         pulse: 52
         HRV: 85
         weight: 68.5
+
+    LoginResponse:
+      type: object
+      properties:
+        role:
+          type: string
 
   securitySchemes:
     bearerAuth:

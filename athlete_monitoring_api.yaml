@@ -369,6 +369,236 @@ paths:
               example:
                 error: Invalid biometric format
 
+  /teams/create:
+    post:
+      tags: [Teams]
+      summary: Создание команды
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamCreateRequest'
+      responses:
+        '201':
+          description: Команда успешно создана
+        '400':
+          description: Ошибка в данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teams:
+    get:
+      tags: [Teams]
+      summary: Список команд
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список команд
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /team/athlete-team-status:
+    get:
+      tags: [Teams]
+      summary: Заявка на вступление в команду
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Заявки на вступление в команду
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamAthleteStatusResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teams/all-athletes:
+    get:
+      tags: [Teams]
+      summary: Список всех спортсменов
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список всех спортсменов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllAthletesResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teams/athletes:
+    post:
+      tags: [Teams]
+      summary: Список спортсменов в команде
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamRequest'
+      responses:
+        '200':
+          description: Список спортсменов в команде
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamGetAthletesResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /team/athlete-remove:
+    post:
+      tags: [Teams]
+      summary: Удаление спортсмена из команды
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AthleteProfileRequest'
+      responses:
+        '200':
+          description: Спортсмен успешно удален из команды
+          content:
+            application/json:
+              example:
+                message: Athlete removed from team
+        '400':
+          description: Невалидные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid athlete data
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '403':
+          description: Пользователь не является тренером команды
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teams/coaches:
+    post:
+      tags: [Teams]
+      summary: Список тренеров в команде
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamRequest'
+      responses:
+        '200':
+          description: Список тренеров в команде
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamGetCoachesResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /teams/join:
     post:
       tags: [Teams]
@@ -380,13 +610,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [team_id]
-              properties:
-                team_id:
-                  type: integer
-            example:
-              team_id: 42
+              $ref: '#/components/schemas/TeamJoinRequest'
       responses:
         '201':
           description: Заявка отправлена
@@ -402,6 +626,68 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error: Invalid team ID
+
+  /teams/joins-list:
+    get:
+      tags: [Teams]
+      summary: Список заявок на вступление в команды
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список заявок на вступление в команду
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamJoinsListResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teams/joins-list/{team_id}:
+    get:
+      tags: [Teams]
+      summary: Список заявок на вступление в команду
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список заявок на вступление в команду
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamJoinsListResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /teams/join/{request_id}/approve:
     post:
@@ -470,19 +756,32 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [name, description]
-              properties:
-                name:
-                  type: string
-                description:
-                  type: string
-            example:
-              name: Подготовка к сбору
-              description: Базовый цикл подготовки
+              $ref: '#/components/schemas/TrainingPlanCreate'
       responses:
         '201':
           description: План создан
+
+  /get-training-plans:
+    post:
+      tags: [Training]
+      summary: Список тренировочных планов
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список тренировочных планов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingPlanListResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
 
   /training-plans/{plan_id}/items:
     post:
@@ -501,26 +800,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [session_date, session_type_id, format_type_id, value]
-              properties:
-                session_date:
-                  type: string
-                  format: date
-                session_type_id:
-                  type: integer
-                format_type_id:
-                  type: integer
-                value:
-                  type: string
-                notes:
-                  type: string
-            example:
-              session_date: "2025-04-18"
-              session_type_id: 2
-              format_type_id: 1
-              value: "01:30"
-              notes: "Лёгкий кросс по парку"
+              $ref: '#/components/schemas/TrainingPlanItemCreate'
       responses:
         '201':
           description: Пункт добавлен
@@ -799,18 +1079,17 @@ components:
       type: object
       required:
         - date
-        - time_of_day
+        - morning_pulse
+        - evening_pulse
+        - HRV
+        - weight
       properties:
         date:
           type: string
-          format: date
-        time_of_day:
-          type: string
-          enum: [morning, evening]
-        time:
-          type: string
-          format: time
-        pulse:
+          format: timestamp
+        morning_pulse:
+          type: integer
+        evening_pulse:
           type: integer
         HRV:
           type: integer
@@ -819,9 +1098,8 @@ components:
           format: float
       example:
         date: "2025-04-17"
-        time_of_day: "morning"
-        time: "07:30"
-        pulse: 52
+        morning_pulse: 52
+        evening_pulse: 67
         HRV: 85
         weight: 68.5
 
@@ -836,10 +1114,14 @@ components:
       properties:
         athlete_id:
           type: integer
+        team_id:
+          type: integer
 
     AthleteProfileResponse:
       type: object
       properties:
+        athlete_id:
+          type: integer
         first_name:
           type: string
         last_name:
@@ -852,6 +1134,42 @@ components:
           type: string
         phone:
           type: string
+        team_name:
+          type: string
+        team_signed_date:
+          type: string
+          format: timestamp
+
+    CoachProfileResponse:
+      type: object
+      properties:
+        coach_id:
+          type: integer
+        role_in_team:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        middle_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        license_number:
+          type: string
+        experience_level:
+          type: string
+        sport_type:
+          type: string
+      required:
+        - coach_id
+        - first_name
+        - last_name
+        - middle_name
+        - email
+        - phone
 
     AthleteTeamResponse:
       type: object
@@ -860,6 +1178,193 @@ components:
           type: string
         sport_type:
           type: string
+
+    TeamCreateRequest:
+      type: object
+      properties:
+        team_name:
+          type: string
+        sport_type_id:
+          type: integer
+
+    Team:
+      type: object
+      properties:
+        team_id:
+          type: integer
+        team_name:
+          type: string
+        sport_type:
+          type: string
+        count_athletes:
+          type: integer
+      required:
+        - team_id
+        - team_name
+        - sport_type
+        - count_athletes
+
+    TeamResponse:
+      type: object
+      properties:
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/Team'
+
+    TeamRequest:
+      type: object
+      properties:
+        team_id:
+          type: integer
+
+    TeamGetAthletesResponse:
+      type: object
+      properties:
+        athletes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AthleteProfileResponse'
+
+    TeamGetCoachesResponse:
+      type: object
+      properties:
+        coaches:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoachProfileResponse'
+
+    TeamJoinRequest:
+      type: object
+      properties:
+        team_id:
+          type: integer
+
+    TeamJoin:
+      type: object
+      properties:
+        request_id:
+          type: integer
+        second_name:
+          type: string
+        first_name:
+          type: string
+        middle_name:
+          type: string
+        email:
+          type: string
+        team_name:
+          type: string
+        request_date:
+          type: string
+        status:
+          type: string
+
+    TeamJoinsListResponse:
+      type: object
+      properties:
+        joins:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamJoin'
+
+    AllAthletesResponse:
+      type: object
+      properties:
+        athletes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AthleteProfileResponse'
+
+    TeamAthleteStatusResponse:
+      type: object
+      properties:
+        request_id:
+          type: integer
+        team_name:
+          type: string
+        requested_at:
+          type: string
+          format: timestamp
+        status:
+          type: string
+
+    TrainingPlanCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        team_id:
+          type: integer
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        status:
+          type: string
+        period_type_id:
+          type: integer
+      required:
+        - title
+        - team_id
+        - start_date
+        - end_date
+        - period_type_id
+
+    TrainingPlanListResponse:
+      type: object
+      properties:
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrainingPlan'
+
+    TrainingPlan:
+      type: object
+      properties:
+        plan_id:
+          type: integer
+        title:
+          type: string
+        team_name:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        status:
+          type: string
+        description:
+          type: string
+
+    TrainingPlanItemCreate:
+      type: object
+      properties:
+        workout_date:
+          type: string
+          format: date
+        time:
+          type: string
+        session_type_id:
+          type: integer
+        format_type_id:
+          type: integer
+        value:
+          type: integer
+        description:
+          type: string
+      required:
+        - workout_date
+        - time
+        - session_type_id
+        - format_type_id
+        - value
 
   securitySchemes:
     bearerAuth:

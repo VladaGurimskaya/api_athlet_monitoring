@@ -565,6 +565,158 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /team/get-critical-athletes:
+    get:
+      tags: [Teams]
+      summary: Список критических спортсменов
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список критических спортсменов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalAthletesResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teams/get-critical-athlete:
+    post:
+      tags: [Teams]
+      summary: Список критических спортсменов в команде
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriticalAthleteRequest'
+      responses:
+        '200':
+          description: Список критических спортсменов в команде
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalAthleteResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teams/refer-athlete-to-medicalstaff:
+    post:
+      tags: [Teams]
+      summary: Направление спортсмена к медицинскому персоналу
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReferAthletesToMedicalstaffRequest'
+      responses:
+        '200':
+          description: Спортсмен успешно направлен к медицинскому персоналу
+          content:
+            application/json:
+              example:
+                message: Athlete referred to medical staff
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teams/medicalstaff:
+    get:
+      tags: [Teams]
+      summary: Список медицинского персонала в команде
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список медицинского персонала в команде
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamGetMedicalstaffResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teams/get-medical-assigments:
+    get:
+      tags: [Teams]
+      summary: Список медицинских назначений
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список медицинских назначений
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamGetMedicalAssignmentsResponse'
+        '401':
+          description: Неавторизованный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Unauthorized
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /teams/coaches:
     post:
       tags: [Teams]
@@ -891,7 +1043,6 @@ paths:
 
 components:
   schemas:
-
     ErrorResponse:
       type: object
       properties:
@@ -1139,6 +1290,142 @@ components:
         team_signed_date:
           type: string
           format: timestamp
+
+    CriticalAthletesResponse:
+      type: object
+      properties:
+        athletes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CriticalAthleteProfileResponse'
+
+    CriticalAthleteProfileResponse:
+      type: object
+      properties:
+        athlete_id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        middle_name:
+          type: string
+        team_name:
+          type: string
+        period_type:
+          type: string
+        indicators:
+          type: array
+          items:
+            $ref: '#/components/schemas/AthleteIndicatorResponse'
+        limits:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/IndicatorLimit'
+
+    AthleteIndicatorResponse:
+      type: object
+      properties:
+        date:
+          type: string
+        hrv:
+          type: integer
+        morning_pulse:
+          type: integer
+        evening_pulse:
+          type: integer
+        weight:
+          type: number
+
+    IndicatorLimit:
+      type: object
+      properties:
+        min:
+          type: number
+        max:
+          type: number
+
+    CriticalAthleteRequest:
+      type: object
+      properties:
+        athlete_id:
+          type: integer
+
+    CriticalAthleteResponse:
+      type: object
+      properties:
+        period_type:
+          type: string
+        indicators:
+          type: array
+          items:
+            $ref: '#/components/schemas/AthleteIndicatorResponse'
+        limits:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/IndicatorLimit'
+
+    ReferAthletesToMedicalstaffRequest:
+      type: object
+      properties:
+        athletes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferAthlete'
+
+    ReferAthlete:
+      type: object
+      properties:
+        athlete_id:
+          type: integer
+        medicalstaff_id:
+          type: integer
+
+    TeamGetMedicalstaffResponse:
+      type: object
+      properties:
+        medicalstaff:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalstaffProfileResponse'
+
+    MedicalstaffProfileResponse:
+      type: object
+      properties:
+        medicalstaff_id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        middle_name:
+          type: string
+        specialization:
+          type: string
+
+    TeamGetMedicalAssignmentsResponse:
+      type: object
+      properties:
+        athletes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalAssigment'
+
+    MedicalAssigment:
+      type: object
+      properties:
+        athlete_id:
+          type: integer
+        athlete_code:
+          type: string
+        assigned_by:
+          type: integer
+        age:
+          type: integer
+        sport_type:
+          type: string
+        status:
+          type: string
 
     CoachProfileResponse:
       type: object
